@@ -9,6 +9,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import busineesTier.models.ProductCategories;
 import busineesTier.models.Products;
@@ -28,46 +29,84 @@ public class ProductsController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {		
-/*		boolean transactionState = false;
-		// get search query
-		String productQuery = request.getParameter("product");
 		
-		EntityManagerFactory factory = (EntityManagerFactory) getServletContext().getAttribute("entityManagerFactory");				
-		EntityManager em = factory.createEntityManager();
- 		
-		List<Products> productList = new ArrayList<Products>();;
-		try{
-			TypedQuery<Products> query =
-				      em.createQuery(
-				    		  "SELECT p FROM Products p "
-				    		  + "WHERE p.name = :name OR p.productSKU = :sku OR p.manufacturer = :manufacturer",
-				    		  Products.class).
-				      setParameter("name", productQuery).
-				      setParameter("sku", productQuery).
-				      setParameter("manufacturer", productQuery);
-			
-			productList = query.getResultList();
-			transactionState = true;			
-		} // there no such category so create a new one
-		catch(NoResultException ex){
-			transactionState = false;
-		} finally {
-			em.close();
-		}
-	
-		// store the dynamic data in the request
-		request.setAttribute("products", productList);
-		// redirect with the new dynamic data
-		request.getRequestDispatcher("jsp/products.jsp").forward(request, response);*/
+		System.out.println("Inside get");
 		
 		String action = request.getParameter("action");
-		if(action!=null && action.equals("getProduct")){
-			System.out.println("Id: "+ request.getParameter("currentId"));
-		}
+		String redirectTo = "";
+		
+		if(action == null){ action = ""; }
+		
+		System.out.println("Action: "+ action);
+		
+		switch (action) {
+		case "": case "listProducts":
+			System.out.println("getting list of products...");
+			// Display the list of guests:
+	        request.setAttribute("products", productDao.getAllPrducts());
+	        redirectTo = "/products.jsp";
+			break;
+			
+		case "addProduct":
+			// add product
+			ProductCategories category = new ProductCategories(request.getParameter("ProductCategory"));
+			Products product = new Products(
+					request.getParameter("ProductName"),
+					request.getParameter("ProductSKU"),
+					new BigDecimal(request.getParameter("ProductPrice")),
+					request.getParameter("ProductManufacturer"),
+					category);
+
+	        productDao.create(product);
+			// Display the list of products:
+			request.setAttribute("products", productDao.getAllPrducts());
+	        redirectTo = "/products.jsp";
+			break;
+			
+		case "editProduct":
+			// edit product
+			HttpSession editSession = request.getSession();
+			Products modifiedProduct = (Products) editSession.getAttribute("currentProduct");
+			modifiedProduct.setName(request.getParameter("ProductName"));
+			modifiedProduct.setProductSKU(request.getParameter("ProductSKU"));
+			modifiedProduct.setListPrice(new BigDecimal(request.getParameter("ProductPrice")));
+			modifiedProduct.setManufacturer(request.getParameter("ProductManufacturer"));
+			modifiedProduct.setModifiedDate();
+			modifiedProduct.getProductCategoryId().setName(request.getParameter("ProductCategory"));
+
+	        productDao.update(modifiedProduct);
+			// Display the list of products:
+			request.setAttribute("products", productDao.getAllPrducts());
+	        redirectTo = "/products.jsp";
+			break;
+			
+		case "getProduct":
+			try{
+				int id = Integer.parseInt((String) request.getParameter("currentProductId"));
+				// after we stored the product in the session variable we do not need the id anymore
+				request.removeAttribute("currentProductId");
+				HttpSession readSession = request.getSession();
+				readSession.setAttribute("currentProduct", productDao.read(id));
+				redirectTo = "/product.jsp";
+			}catch (NumberFormatException ex){
+				redirectTo = "/error404.jsp";
+			}
+			break;
+			
+		case "removeProduct":
+			HttpSession removeSession = request.getSession();
+			productDao.delete( (Products) removeSession.getAttribute("currentProduct") );
+			// after we deleted the record we have to make sure we don't try to get it later
+			removeSession.removeAttribute("currentProduct");
+			redirectTo = "/products.jsp";
+			break;
+			
+		default:
+			break;
+		}	
 	 
-        // Display the list of guests:
-        request.setAttribute("products", productDao.getAllPrducts());
-        request.getRequestDispatcher("/products.jsp").forward(request, response);
+		request.getRequestDispatcher(redirectTo).forward(request, response);
+        
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {	
@@ -125,7 +164,7 @@ public class ProductsController extends HttpServlet {
 		// Handle a new guest:
        // String name = request.getParameter("name");
         //if (name != null)
-            productDao.persist(product);
+            productDao.create(product);
  
         // Display the list of guests:
         doGet(request, response);

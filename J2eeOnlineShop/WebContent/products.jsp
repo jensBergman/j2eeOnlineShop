@@ -21,37 +21,26 @@
     </head>
  
     <body>
-  
-        <form method="POST" action="Products">
-            Name: <input type="text" name="name" />
-            <input type="submit" value="Add" />
-        </form>
- 
-        <hr><ol> <%
-            @SuppressWarnings("unchecked") 
-            List<Products> products = (List<Products>)request.getAttribute("products");
-            if (products != null) {
-                for (Products product : products) { %>
-                    <li> <%= product %> </li> <%
-                }
-            } %>
-        </ol><hr>
         
-        <table>
-		  <tr>
-		    <th>Name</th>
-		    <th>Manufacturer</th>
-		    <th>SKU</th>
-		    <th></th>
-		  </tr>
+        <table class="table">
+        	<thead>
+			  <tr>
+			    <th>Name</th>
+			    <th>Manufacturer</th>
+			    <th>SKU</th>
+			    <th></th>
+			  </tr>
+	  		</thead>
+	  		<tbody>
 			<c:forEach items="${products}" var="item">
-			     <tr>
+		     <tr>
 			    <td>${item.name}</td>
 			    <td>${item.manufacturer}</td>
 			    <td>${item.productSKU}</td>
-			    <td><a class="btn" href="Products?action=getProduct&currentId=${item.id}">View</a></td>
+			    <td><a class="btn" href="Products?action=getProduct&currentProductId=${item.id}">View</a></td>
 			  </tr>
 			</c:forEach>
+			</tbody>
 		</table>
      </body>
  </html>

@@ -13,6 +13,9 @@ import javax.persistence.*;
 @Entity
 public class Products implements Serializable {
 
+
+	private static final long serialVersionUID = 4188443907236765075L;
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
@@ -31,7 +34,7 @@ public class Products implements Serializable {
 	private Calendar modifiedDate;
 	@Column(nullable=false, length=50)
 	private String manufacturer;
-	private static final long serialVersionUID = 1L;
+
 
 //	extend for maintenance
 //	/*
@@ -134,8 +137,8 @@ public class Products implements Serializable {
 		return this.modifiedDate;
 	}
 
-	public void setModifiedDate(Calendar modifiedDate) {
-		this.modifiedDate = modifiedDate;
+	public void setModifiedDate() {
+		this.modifiedDate = Calendar.getInstance();
 	}
 
 	public ProductCategories getProductCategoryId() {

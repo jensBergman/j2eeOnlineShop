@@ -10,10 +10,11 @@
 <h1>Yeeeehaaaawwww!!!</h1>
 <h2>Wälcome to Bengan's cykelshop!!</h2>
 
-<form action="Products">
-	Search product name or brand?
-	<input name="product" type="text" value="Search">
-	<input type="submit" value="Submit">
-</form>
+Go to:<br>
+<ul>
+  <li><a href="products.jsp">Find products</a></li>
+  <li><a href="admin/addProduct.jsp">Add product</a></li>
+  <!-- <li><a href="url">link text</a></li> -->
+</ul>
 </body>
 </html>

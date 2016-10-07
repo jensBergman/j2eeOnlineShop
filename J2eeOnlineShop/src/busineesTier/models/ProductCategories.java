@@ -12,13 +12,12 @@ import javax.persistence.*;
 
 public class ProductCategories implements Serializable {
 
-	   
+	private static final long serialVersionUID = -1127316231589360174L;
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	@Column(unique=true, nullable=false, length=50)
 	private String name;
-	private static final long serialVersionUID = 1L;
 
 	public ProductCategories() {
 		super();
